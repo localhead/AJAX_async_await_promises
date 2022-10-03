@@ -24,6 +24,8 @@ const showCard = function (data, className = '') {
 };
 
 const run = function (countryName) {
+  // OLD SCHOOL STUFF GOIN ON HERE
+
   // 1) making request with ajax call
   const request = new XMLHttpRequest();
   // 2) here we order info from this url
@@ -41,21 +43,26 @@ const run = function (countryName) {
 
     showCard(data);
 
-    // now lets request new data but after
-    // we get the data about the main country
+    // now lets request new data but after we get the data about the main country
+    // in other words, lets see neighbour
     const [neighbour] = data.borders;
     console.log(neighbour);
     if (!neighbour) return;
 
-    const request2 = new XMLHttpRequest();
-    request2.open('GET', `https://restcountries.com/v3.1/alpha/${neighbour}`);
-    request2.send();
+    /*     
+    // here starts a callback hell when we want to have a new data 
+    // based on old data
 
     request2.addEventListener('load', function () {
       const [data2] = JSON.parse(this.responseText);
       console.log(data2);
       showCard(data2, 'neighbour');
-    });
+    }); 
+    */
+
+    // intstead of dealing with it lets use a promise
+    // here how can we use the promise
+    getCountryData(neighbour);
   });
 };
 
@@ -67,3 +74,18 @@ btnFind.addEventListener('click', function (e) {
 
   run(countryName);
 });
+
+// making the same request as with a main country but with promise.
+// 1 - we fetch data from API, it returning a promise
+// 2 - then we get it with JSON, to read the response. it also returns a promise
+// 3 - then we store that data in last function
+const getCountryData = function (country) {
+  fetch(`https://restcountries.com/v3.1/name/${country}`)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      console.log(data);
+      showCard(data[0], 'neighbour');
+    });
+};
