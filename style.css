@@ -57,13 +57,28 @@ input {
   border: none;
   border-radius: 5px;
   padding: 10px 3px;
+  width: 180px;
   text-transform: uppercase;
   font-size: 18px;
   font-family: 'Poppins', sans-serif;
   font-weight: 300;
 }
 
-.btn-find:hover {
+.btn-where-am-i {
+  margin-top: 25px;
+  background-color: rgb(249, 161, 161);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 3px;
+  width: 180px;
+  text-transform: uppercase;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+}
+
+.btn-find:hover,
+.btn-where-am-i:hover {
   cursor: pointer;
   color: #eee;
   background-color: #555;
@@ -171,4 +186,9 @@ input {
   margin: 2rem;
   border: 3rem solid white;
   box-shadow: 0 2rem 5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.text-info {
+  margin-top: 15px;
+  font-size: 20px;
 }

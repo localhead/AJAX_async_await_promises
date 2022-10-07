@@ -2,7 +2,11 @@
 
 const countriesContainer = document.querySelector('.countries');
 const btnFind = document.querySelector('.btn-find');
+const btnGetPlace = document.querySelector('.btn-where-am-i');
 const inputName = document.querySelector('.input_name');
+const geolocationTitle = document.getElementById('geolocation-info');
+const placeTitle = document.getElementById('place-info');
+const countriesContainerSecond = document.querySelector('.countries_second');
 
 const showCard = function (data, className = '') {
   const html = `
@@ -35,22 +39,41 @@ const renderError = function (message) {
 
 const run = function (countryName) {
   fetch(`https://restcountries.com/v3.1/name/${countryName}`)
-    .then(response => response.json())
-    .then(data => {
-      showCard(data[0]);
-      const neighbour = data[0].borders[0];
-      console.log(neighbour);
+    .then(response => {
+      // handling error if country not found
+      console.log(response);
 
-      return fetch(`https://restcountries.com/v3.1/alpha/${neighbour}`);
+      if (response.status !== 200) {
+        throw new Error(`Country not found! (${response.status})`);
+      }
+      return response.json();
     })
-    .then(response => response.json())
+    .then(data => {
+      console.log(data[0]);
+      showCard(data[0]);
+      //const neighbour = data[0].borders[0];
+      //console.log(neighbour);
+
+      if (!data[0].borders) throw new Error('No neighbour found!');
+
+      return fetch(
+        `https://restcountries.com/v3.1/alpha/${data[0].borders[0]}`
+      );
+    })
+    .then(response => {
+      // handling error if country not found
+      if (!response.status) {
+        throw new Error(`Country not found! (${response.status})`);
+      }
+      return response.json();
+    })
     .then(data => {
       showCard(data[0], 'neighbour');
     })
-    .catch(error => {
+    .catch(err => {
       //dealing with errors if we could not fetch
-      console.log(error);
-      renderError(`Conection lost! ${error}`);
+      console.log(err);
+      renderError(`${err}`);
     })
     .finally(() => {
       console.log(
@@ -82,3 +105,61 @@ const getCountryData = function (country) {
       showCard(data[0], 'neighbour');
     });
 };
+/* 
+
+
+
+*/
+// Promises Codding Challenge #1
+btnGetPlace.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  console.log('clicked');
+  geolocationTitle.textContent = 'e';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        console.log(position);
+        const data = [position.coords.latitude, position.coords.longitude];
+
+        geolocationTitle.textContent = `Latitude: ${position.coords.latitude} Longitude: ${position.coords.longitude}`;
+        whereAmI(data);
+        btnFind.style.opacity = 0;
+        inputName.style.opacity = 0;
+      },
+      function () {
+        alert('Could not get you position');
+      }
+    );
+  }
+
+  const whereAmI = function (data) {
+    console.log(data[0]);
+
+    fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${data[0]}&longitude=///${data[1]}&localityLanguage=en`
+    )
+      .then(response => {
+        console.log(response);
+
+        if (response.status !== 200) {
+          throw new Error(`not 200(${response.status})`);
+        }
+
+        return response.json();
+      })
+      .then(response => {
+        console.log(response);
+        placeTitle.textContent = `You are in ${response.countryName}, ${response.city}`;
+        return response;
+      })
+      .then(response => {
+        run(response.countryName);
+      })
+      .catch(err => {
+        //dealing with errors if we could not fetch
+        console.log(err);
+      });
+  };
+});
