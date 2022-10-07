@@ -163,3 +163,30 @@ btnGetPlace.addEventListener('click', function (e) {
       });
   };
 });
+/* 
+
+
+
+*/
+// Coding Challenge #2 // loading images
+// push the btn which will load the image. after 2 sec after
+// it has loaded - load the second one
+const btnLoadImg = document.querySelector('.btn-load-img');
+const imageLoad = document.createElement('img');
+const imagesPlace = document.querySelector('.images');
+
+btnLoadImg.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const createImage = function () {
+    return new Promise(function (resolve, reject) {
+      resolve(() => {
+        imageLoad.src = 'img/img-1.jpg';
+        imagesPlace.append(imageLoad);
+      });
+      err => reject(err);
+    });
+  };
+
+  createImage();
+});
