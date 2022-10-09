@@ -344,3 +344,29 @@ const RaceTimerWithTimer = async function () {
 };
 
 RaceTimerWithTimer();
+/* 
+
+
+*/
+// Promise.allSettled - shows all the results even though some are rejected
+
+Promise.allSettled([
+  Promise.resolve('Success'),
+  Promise.reject('Not success'),
+  Promise.resolve('Success for sure'),
+])
+  .then(res => console.log(res))
+  .catch(err => console.error(err.message));
+/* 
+
+
+*/
+// Promise.allSettled - always shows only one fastest of the results
+// even though some might be rejected
+Promise.any([
+  Promise.resolve('Success'),
+  Promise.reject('Not success'),
+  Promise.resolve('Success for sure'),
+])
+  .then(res => console.log(res))
+  .catch(err => console.error(err.message));
