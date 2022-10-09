@@ -286,22 +286,23 @@ DoSomeThing('Russia').then(result => console.log(result));
 /* 
 
 
+
+
 */
+const getJSON = async function (country) {
+  const what = await fetch(`https://restcountries.com/v3.1/name/${country}`);
+
+  if (!what.status) {
+    throw new Error(`Country not found! (${response.status})`);
+  }
+
+  return what.json();
+};
+
+// Promise.all
 // in this fn we use async operations at the same time!
 const get3Countries = async function (c1, c2, c3) {
   try {
-    const getJSON = async function (country) {
-      const what = await fetch(
-        `https://restcountries.com/v3.1/name/${country}`
-      );
-
-      if (!what.status) {
-        throw new Error(`Country not found! (${response.status})`);
-      }
-
-      return what.json();
-    };
-
     const data = await Promise.all([getJSON(c1), getJSON(c2), getJSON(c3)]);
     const res = [data.map(d => d[0].capital)].flat(2);
     console.log(res);
@@ -311,3 +312,35 @@ const get3Countries = async function (c1, c2, c3) {
 };
 
 get3Countries('Spain', 'Tanzania', 'norway');
+
+/* 
+
+
+*/
+// Promise.race - first settled promise wins the race.
+// data will have data from the fastest promise. No matter if its relosved or reject
+(async function () {
+  const data = await Promise.race([
+    getJSON('italy'),
+    getJSON('spain'),
+    getJSON('brazil'),
+  ]);
+
+  const [res] = data;
+  console.log('Check out RACE! Res is ', res);
+})();
+
+// Example of race which throws error if time of loading was above 10 seconds
+const RaceTimerWithTimer = async function () {
+  const result = await Promise.race([
+    getJSON('mongolia'),
+    new Promise(function (_, reject) {
+      return setTimeout(function () {
+        reject(new Error('Request took too much time!'));
+      }, 10000);
+    }),
+  ]);
+  console.log(result);
+};
+
+RaceTimerWithTimer();
