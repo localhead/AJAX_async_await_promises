@@ -176,17 +176,138 @@ const imageLoad = document.createElement('img');
 const imagesPlace = document.querySelector('.images');
 
 btnLoadImg.addEventListener('click', function (e) {
-  e.preventDefault();
-
-  const createImage = function () {
-    return new Promise(function (resolve, reject) {
-      resolve(() => {
-        imageLoad.src = 'img/img-1.jpg';
-        imagesPlace.append(imageLoad);
-      });
-      err => reject(err);
+  // create a fn which just waits given amount of seconds
+  // the purpose of this fn with promise is only to count seconds
+  const wait = function (seconds) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        console.log(`${seconds} second passed`);
+        // telling promise that it has been resolved
+        resolve();
+      }, seconds * 1000);
     });
   };
 
-  createImage();
+  // create fn with a promise which takes a path for pict
+  // this promise can return resolve if success
+  // or it can return reject if failture
+  // then on resolve it loads it and returns picture
+  // on reject it creates a new error
+
+  const createImage = function (imgPath) {
+    return new Promise((resolve, reject) => {
+      imageLoad.src = `${imgPath}`;
+
+      // If image loaded then return that const on resolved
+      imageLoad.addEventListener('load', () => {
+        imagesPlace.append(imageLoad);
+        resolve(imageLoad);
+      });
+
+      imageLoad.addEventListener('error', () => {
+        reject(new Error('Image not loaded'));
+      });
+    });
+  };
+
+  let currentImg;
+
+  createImage('img/img-1.jpg')
+    .then(img => {
+      currentImg = img;
+      console.log('Image 1 loaded');
+      // loading 2 seconds after loading
+      return wait(2);
+    })
+    .then(() => {
+      //currentImg.style.display = 'none';
+      return createImage('img/img-2.jpg');
+    })
+    .then(img => {
+      currentImg = img;
+      console.log('Image 2 loaded');
+      return wait(2);
+    })
+    .then(() => {
+      currentImg.style.display = 'none';
+    })
+    .catch(err => console.error(err));
 });
+/* 
+
+
+
+*/
+// Async Await/ its just a syntactic sugar for promises
+
+const DoSomeThing = async function (country) {
+  // Using try/Catch in order to find error in code
+  try {
+    // wait until U get data and then store it in variable
+    const result = await fetch(
+      `https://restcountries.com/v3.1/name/${country}`
+    );
+
+    // wait until data will be jsoned and store it
+    const toJayson = await result.json();
+
+    // show me what you got after some time
+    console.log(toJayson);
+
+    // Lets make an error to catch
+    if (toJayson[0].capital[0] === 'Paris')
+      throw new Error('This is a Fucking Paris. We hate those frog Lovers!');
+    return toJayson[0].capital[0];
+  } catch (err) {
+    // Here we are trying to catch every occuring
+    // error in code grabed with try
+    console.error(err.message);
+  }
+};
+
+DoSomeThing('France');
+
+// Cool now let get data from asycn func
+// Is it going to work?
+const AsyncFnResult = DoSomeThing('Russia');
+console.log(AsyncFnResult);
+// it will return a promise dumbass!
+// cuz asycn fn always returns a promise
+// because JS did not get data out of it at real time!
+// instead of this use 'than' method again!
+DoSomeThing('Russia').then(result => console.log(result));
+
+// But lets not mix old aproach of writing promises with 'then' with async/await
+// and lets use IIFE in order to get the result and still remain inside of asycn/await syntax
+(async function () {
+  const resultAsync = await DoSomeThing('Portugal');
+  console.log(resultAsync);
+})();
+/* 
+
+
+*/
+// in this fn we use async operations at the same time!
+const get3Countries = async function (c1, c2, c3) {
+  try {
+    const getJSON = async function (country) {
+      const what = await fetch(
+        `https://restcountries.com/v3.1/name/${country}`
+      );
+
+      if (!what.status) {
+        throw new Error(`Country not found! (${response.status})`);
+      }
+
+      return what.json();
+    };
+
+    const data = await Promise.all([getJSON(c1), getJSON(c2), getJSON(c3)]);
+    const res = [data.map(d => d[0].capital)].flat(2);
+    console.log(res);
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+get3Countries('Spain', 'Tanzania', 'norway');
