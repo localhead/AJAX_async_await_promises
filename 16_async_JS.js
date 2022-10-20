@@ -121,3 +121,24 @@ const getPosition = function () {
 getPosition()
   .then(resolved => console.log(resolved))
   .catch(rejected => console.error(rejected));
+/* 
+
+
+
+
+*/
+// top level await. this wait stops the execution! it will be executed first. it blocking entite execution!
+const getLastUser = async function () {
+  const res = await fetch('https://jsonplaceholder.typicode.com/users');
+  const data = await res.json();
+  console.log(data);
+
+  return { user: data.at(-1).id, name: data.at(-1).name };
+};
+
+// this will return a promise cuz data is not recieved while executing :(
+const res = getLastUser();
+
+// insted use top -level awiat
+const res2 = await getLastUser();
+console.log(res2);
